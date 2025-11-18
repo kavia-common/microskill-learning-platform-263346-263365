@@ -3,7 +3,7 @@ const jsConfig = {
   files: ['**/*.js'],
   languageOptions: {
     ecmaVersion: 'latest',
-    sourceType: 'commonjs',
+    sourceType: 'module',
   },
   rules: {
     semi: ['error', 'always'],
@@ -15,4 +15,4 @@ const ignoreConfig = {
   ignores: ['node_modules/**'],
 };
 
-module.exports = [ignoreConfig, jsConfig];
+export default [ignoreConfig, jsConfig];

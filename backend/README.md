@@ -8,6 +8,9 @@ Static assets
 
 - POST /api/generate-lesson: Generate a micro-lesson and quiz via a JSON-only template (no external model calls). Validates, moderates, normalizes, and optionally saves to Supabase.
 - POST /api/generate-media: Render a local kinetic-text MP4 (muted with short beep) and WebVTT captions for a given lesson title. Outputs to public/assets paths for the frontend to auto-detect.
+- GET /api/lessons: Built-in micro-lessons list -> [{ id, title }]
+- GET /api/lessons/:id: Built-in micro-lesson detail -> { id, title, narrationScript, captions[], ssml, kaviyaVideoPrompt, media }
+- Progress endpoints remain the same: GET/POST /api/progress
 
 ## Setup
 

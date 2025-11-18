@@ -1,35 +1,24 @@
 const express = require('express');
 const healthController = require('../controllers/health');
+const lessonsController = require('../controllers/lessons');
+const quizController = require('../controllers/quiz');
+const progressController = require('../controllers/progress');
 
 const router = express.Router();
-// Health endpoint
 
-/**
- * @swagger
- * /:
- *   get:
- *     summary: Health endpoint
- *     responses:
- *       200:
- *         description: Service health check passed
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: ok
- *                 message:
- *                   type: string
- *                   example: Service is healthy
- *                 timestamp:
- *                   type: string
- *                   format: date-time
- *                 environment:
- *                   type: string
- *                   example: development
- */
+// Health
 router.get('/', healthController.check.bind(healthController));
+
+// Lessons
+router.get('/api/lessons', lessonsController.list);
+router.get('/api/lessons/:id', lessonsController.getById);
+
+// Quiz
+router.get('/api/lessons/:id/quiz', quizController.getForLesson);
+router.post('/api/lessons/:id/quiz', quizController.submitForLesson);
+
+// Progress
+router.get('/api/progress', progressController.get);
+router.post('/api/progress', progressController.update);
 
 module.exports = router;

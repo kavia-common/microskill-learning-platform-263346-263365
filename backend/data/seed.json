@@ -1,0 +1,79 @@
+{
+  "lessons": [
+    {
+      "id": "l1",
+      "title": "Master Keyboard Shortcuts",
+      "videoUrl": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+      "summary": "Boost productivity by learning essential keyboard shortcuts.",
+      "durationSeconds": 45
+    },
+    {
+      "id": "l2",
+      "title": "Effective Note Taking",
+      "videoUrl": "https://cdn.videvo.net/videvo_files/video/free/2014-11/large_preview/Timelapse_6.mp4",
+      "summary": "Capture and organize knowledge efficiently using simple frameworks.",
+      "durationSeconds": 60
+    },
+    {
+      "id": "l3",
+      "title": "Quick Inbox Zero",
+      "videoUrl": "https://cdn.videvo.net/videvo_files/video/free/2013-08/large_preview/hd0999.mp4",
+      "summary": "Process email fast with batching and triage patterns.",
+      "durationSeconds": 50
+    }
+  ],
+  "quizzes": [
+    {
+      "lessonId": "l1",
+      "questions": [
+        {
+          "id": "q1",
+          "text": "Which shortcut commonly copies selected text?",
+          "options": ["Ctrl+X", "Ctrl+C", "Ctrl+V", "Ctrl+Z"],
+          "answerIndex": 1
+        },
+        {
+          "id": "q2",
+          "text": "Which shortcut usually pastes?",
+          "options": ["Ctrl+P", "Ctrl+V", "Ctrl+Shift+V", "Ctrl+Alt+V"],
+          "answerIndex": 1
+        }
+      ]
+    },
+    {
+      "lessonId": "l2",
+      "questions": [
+        {
+          "id": "q1",
+          "text": "Which method focuses on key points and main ideas?",
+          "options": ["Dictation", "Cornell method", "Random bullets", "Mind blanking"],
+          "answerIndex": 1
+        },
+        {
+          "id": "q2",
+          "text": "A key practice after note-taking is to...",
+          "options": ["Never review", "Share immediately", "Review and summarize", "Delete old notes"],
+          "answerIndex": 2
+        }
+      ]
+    },
+    {
+      "lessonId": "l3",
+      "questions": [
+        {
+          "id": "q1",
+          "text": "Inbox Zero is mainly about...",
+          "options": ["Having zero emails forever", "A process to clear inbox regularly", "Ignoring emails", "Auto-deleting emails"],
+          "answerIndex": 1
+        },
+        {
+          "id": "q2",
+          "text": "Batching emails means...",
+          "options": ["Reading emails every second", "Turning off email", "Handling emails in set time windows", "Forwarding all emails"],
+          "answerIndex": 2
+        }
+      ]
+    }
+  ],
+  "progress": []
+}

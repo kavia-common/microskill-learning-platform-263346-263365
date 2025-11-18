@@ -2,6 +2,10 @@
 
 Express API for AI-based lesson generation and local media rendering.
 
+Static assets
+- Generated media is written under public/assets and served at /assets by this server.
+- Ensure FRONTEND_ORIGIN in .env is set to your frontend origin (e.g., http://localhost:3000) to allow browser calls.
+
 - POST /api/generate-lesson: Generate a micro-lesson and quiz via a JSON-only template (no external model calls). Validates, moderates, normalizes, and optionally saves to Supabase.
 - POST /api/generate-media: Render a local kinetic-text MP4 (muted with short beep) and WebVTT captions for a given lesson title. Outputs to public/assets paths for the frontend to auto-detect.
 

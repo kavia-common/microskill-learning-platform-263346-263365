@@ -138,8 +138,22 @@ app.use(morgan('dev'));
 // Serve generated static assets relative to repo root
 app.use('/assets', express.static(path.resolve(__dirname, '../../public/assets')));
 
-// Swagger UI
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapi));
+ // Swagger UI
+ app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapi));
+
+ // PUBLIC_INTERFACE
+ // Simple help route describing media usage and static asset serving.
+ app.get('/api/help/media', (req, res) => {
+   res.json({
+     message: 'Media generation writes to /assets paths. Use POST /api/generate-media with { title, summary?, takeaways? }.',
+     servedFrom: '/assets',
+     outputs: {
+       video: '/assets/video/mp4/{slug}.mp4',
+       captions: '/assets/captions/{slug}.vtt'
+     },
+     note: 'No WebSocket endpoints are used in this project.'
+   });
+ });
 
 /**
  * Utility: normalize and create a canonical slug.

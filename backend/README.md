@@ -24,6 +24,13 @@ Static assets
    npm start
    Open API docs at http://localhost:3001/docs
 
+Notes on module format:
+- This project uses "type": "module" in package.json so src/server.js uses ESM imports.
+- Some internal utilities (e.g., src/app.js, swagger.js) use CommonJS and are not part of the runtime entrypoint.
+- Scripts:
+  - start: node src/server.js
+  - dev: NODE_ENV=development node --watch src/server.js
+
 ## Endpoints
 
 ### POST /api/generate-lesson

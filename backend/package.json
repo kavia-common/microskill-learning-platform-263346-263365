@@ -8,7 +8,8 @@
     "start": "node src/server.js",
     "dev": "NODE_ENV=development node --watch src/server.js",
     "generate:openapi": "node generate_openapi.js",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "postinstall": "node -e \"console.log('postinstall: dependencies installed')\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
@@ -23,5 +24,7 @@
     "node-canvas": "^2.11.2",
     "slugify": "^1.6.6",
     "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
   }
 }

@@ -71,3 +71,12 @@ Notes:
 
 ## Frontend Integration
 The frontend resolves video/captions by slug. Assets written under public/assets are served at /assets in this backend and are compatible with the React app's mapping.
+
+- Generated MP4 path: public/assets/video/mp4/{slug}.mp4 -> served at /assets/video/mp4/{slug}.mp4
+- Generated WebVTT path: public/assets/captions/{slug}.vtt -> served at /assets/captions/{slug}.vtt
+- The React DiagnosticsPanel probes:
+  - GET {API_BASE}/ for health
+  - OPTIONS/GET {API_BASE}/api/generate-lesson and /api/generate-media
+  - HEAD /assets/video/mp4/quick-inbox-zero.mp4 and /assets/captions/quick-inbox-zero.vtt
+
+Ensure CORS FRONTEND_ORIGIN is set (see .env.example) so probes succeed from the frontend.

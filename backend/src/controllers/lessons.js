@@ -1,18 +1,17 @@
-const { loadDB } = require('../utils/db');
+const lessonModel = require('../models/lessonModel');
 
 module.exports = {
   // PUBLIC_INTERFACE
-  list(req, res) {
+  async list(req, res) {
     /** Return all lessons. */
-    const db = loadDB();
-    res.json(db.lessons);
+    const lessons = await lessonModel.getLessons();
+    res.json(lessons);
   },
 
   // PUBLIC_INTERFACE
-  getById(req, res) {
+  async getById(req, res) {
     /** Return a single lesson by id. */
-    const db = loadDB();
-    const lesson = db.lessons.find(l => l.id === req.params.id);
+    const lesson = await lessonModel.getLessonById(req.params.id);
     if (!lesson) return res.status(404).json({ error: 'Lesson not found' });
     res.json(lesson);
   }

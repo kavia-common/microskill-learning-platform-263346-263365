@@ -1,4 +1,5 @@
-const { loadDB, saveDB } = require('../utils/db');
+const quizModel = require('../models/quizModel');
+const { readDB, writeDB } = require('../utils/db');
 
 function validateSubmission(body) {
   const errors = [];
@@ -10,10 +11,9 @@ function validateSubmission(body) {
 
 module.exports = {
   // PUBLIC_INTERFACE
-  getForLesson(req, res) {
+  async getForLesson(req, res) {
     /** Get quiz for a lesson id. */
-    const db = loadDB();
-    const quiz = db.quizzes.find(q => q.lessonId === req.params.id);
+    const quiz = await quizModel.getQuizByLessonId(req.params.id);
     if (!quiz) return res.status(404).json({ error: 'Quiz not found' });
     // Hide answers
     const sanitized = {
@@ -28,13 +28,13 @@ module.exports = {
   },
 
   // PUBLIC_INTERFACE
-  submitForLesson(req, res) {
+  async submitForLesson(req, res) {
     /** Grade quiz submission and persist progress. */
     const errors = validateSubmission(req.body);
     if (errors.length) return res.status(400).json({ errors });
 
     const { userId, answers } = req.body;
-    const db = loadDB();
+    const db = await readDB();
     const quiz = db.quizzes.find(q => q.lessonId === req.params.id);
     if (!quiz) return res.status(404).json({ error: 'Quiz not found' });
 
@@ -58,7 +58,7 @@ module.exports = {
     if (existingIdx >= 0) db.progress[existingIdx] = { ...db.progress[existingIdx], ...record };
     else db.progress.push(record);
 
-    saveDB(db);
+    await writeDB(db);
     res.json({ score, results });
   }
 };

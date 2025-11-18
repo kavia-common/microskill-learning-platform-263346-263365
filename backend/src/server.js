@@ -572,7 +572,22 @@ app.get('/', (req, res) => {
   res.json({ status: 'ok', message: 'Service is healthy', timestamp: new Date().toISOString(), environment: process.env.NODE_ENV || 'development' });
 });
 
-app.listen(PORT, () => {
-  // eslint-disable-next-line no-console
-  console.log(`Backend listening on :${PORT}`);
-});
+import { createRequire } from 'module';
+const requireCjs = createRequire(import.meta.url);
+const { initStore } = requireCjs('./utils/db');
+
+(async () => {
+  try {
+    await initStore();
+    // eslint-disable-next-line no-console
+    console.log('Data store initialized');
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to initialize data store', e);
+  }
+
+  app.listen(PORT, () => {
+    // eslint-disable-next-line no-console
+    console.log(`Backend listening on :${PORT}`);
+  });
+})();

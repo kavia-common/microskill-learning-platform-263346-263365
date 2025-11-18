@@ -29,8 +29,124 @@ const { requireString, requireArrayOfStrings, collectErrors } = requireCjs('./ut
 // Apply standard middleware stack (helmet, cors via FRONTEND_ORIGIN, compression, morgan, rate limit, json)
 buildMiddlewareStack(app);
 
-// Serve static media at /assets
-app.use('/assets', express.static(path.resolve(__dirname, '../../public/assets')));
+/**
+ * Serve static media at /assets with explicit MIME and CORS for media diagnostics.
+ * We keep the static middleware for directory listing/fallbacks but add specific
+ * handlers for video and captions to guarantee correct Content-Type and CORS on HEAD/GET.
+ */
+const ASSETS_ROOT = path.resolve(__dirname, '../../public/assets');
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || '*';
+
+/**
+ * Set CORS headers for assets responses.
+ */
+function setAssetCors(res) {
+  if (FRONTEND_ORIGIN === '*') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', FRONTEND_ORIGIN);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Range');
+}
+
+// Explicit HEAD for video to make DiagnosticsPanel checks deterministic
+app.head('/assets/video/mp4/:filename', (req, res) => {
+  try {
+    const file = req.params.filename || '';
+    // Only allow .mp4
+    if (!/^[a-z0-9-_]+\.mp4$/i.test(file)) {
+      setAssetCors(res);
+      return res.status(400).end();
+    }
+    const filePath = path.join(ASSETS_ROOT, 'video/mp4', file);
+    if (!fs.existsSync(filePath)) {
+      setAssetCors(res);
+      return res.status(404).end();
+    }
+    const stat = fs.statSync(filePath);
+    setAssetCors(res);
+    res.setHeader('Content-Type', 'video/mp4');
+    res.setHeader('Content-Length', String(stat.size));
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Cache-Control', 'public, max-age=3600, immutable');
+    return res.status(200).end();
+  } catch {
+    setAssetCors(res);
+    return res.status(500).end();
+  }
+});
+
+// Explicit GET for video with correct headers (delegating to static sendFile)
+app.get('/assets/video/mp4/:filename', (req, res) => {
+  const file = req.params.filename || '';
+  if (!/^[a-z0-9-_]+\.mp4$/i.test(file)) {
+    setAssetCors(res);
+    return res.status(400).json({ error: { message: 'Invalid filename' } });
+  }
+  const filePath = path.join(ASSETS_ROOT, 'video/mp4', file);
+  if (!fs.existsSync(filePath)) {
+    setAssetCors(res);
+    return res.status(404).json({ error: { message: 'Not found' } });
+  }
+  const stat = fs.statSync(filePath);
+  setAssetCors(res);
+  res.setHeader('Content-Type', 'video/mp4');
+  res.setHeader('Content-Length', String(stat.size));
+  res.setHeader('Accept-Ranges', 'bytes');
+  res.setHeader('Cache-Control', 'public, max-age=3600, immutable');
+  return res.sendFile(filePath);
+});
+
+// Explicit HEAD for captions (.vtt must be text/vtt)
+app.head('/assets/captions/:filename', (req, res) => {
+  try {
+    const file = req.params.filename || '';
+    if (!/^[a-z0-9-_]+\.vtt$/i.test(file)) {
+      setAssetCors(res);
+      return res.status(400).end();
+    }
+    const filePath = path.join(ASSETS_ROOT, 'captions', file);
+    if (!fs.existsSync(filePath)) {
+      setAssetCors(res);
+      return res.status(404).end();
+    }
+    const stat = fs.statSync(filePath);
+    setAssetCors(res);
+    res.setHeader('Content-Type', 'text/vtt; charset=utf-8');
+    res.setHeader('Content-Length', String(stat.size));
+    res.setHeader('Cache-Control', 'public, max-age=3600, immutable');
+    return res.status(200).end();
+  } catch {
+    setAssetCors(res);
+    return res.status(500).end();
+  }
+});
+
+// Explicit GET for captions
+app.get('/assets/captions/:filename', (req, res) => {
+  const file = req.params.filename || '';
+  if (!/^[a-z0-9-_]+\.vtt$/i.test(file)) {
+    setAssetCors(res);
+    return res.status(400).json({ error: { message: 'Invalid filename' } });
+  }
+  const filePath = path.join(ASSETS_ROOT, 'captions', file);
+  if (!fs.existsSync(filePath)) {
+    setAssetCors(res);
+    return res.status(404).json({ error: { message: 'Not found' } });
+  }
+  const stat = fs.statSync(filePath);
+  setAssetCors(res);
+  res.setHeader('Content-Type', 'text/vtt; charset=utf-8');
+  res.setHeader('Content-Length', String(stat.size));
+  res.setHeader('Cache-Control', 'public, max-age=3600, immutable');
+  return res.sendFile(filePath);
+});
+
+// Keep generic static last for other files under /assets, e.g., thumbnails
+app.use('/assets', express.static(ASSETS_ROOT));
 
 // Basic OpenAPI spec; servers injected dynamically
 const baseOpenapi = {

@@ -40,8 +40,110 @@ app.use('/docs', swaggerUi.serve, (req, res, next) => {
 // Parse JSON request body
 app.use(express.json({ limit: '1mb' }));
 
-// Serve static assets at /assets for generated media
-app.use('/assets', express.static(path.join(__dirname, '../../public/assets')));
+/**
+ * Serve static assets at /assets for generated media with explicit MIME/CORS for media.
+ * This secondary app.js also mirrors the behavior to ensure consistency if used.
+ */
+const ASSETS_ROOT = path.join(__dirname, '../../public/assets');
+
+// Helper to set CORS for assets
+function setAssetCors(res) {
+  const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || '*';
+  if (FRONTEND_ORIGIN === '*') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', FRONTEND_ORIGIN);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Range');
+}
+
+// HEAD routes
+app.head('/assets/video/mp4/:filename', (req, res) => {
+  const file = req.params.filename || '';
+  if (!/^[a-z0-9-_]+\.mp4$/i.test(file)) {
+    setAssetCors(res);
+    return res.status(400).end();
+  }
+  const p = path.join(ASSETS_ROOT, 'video/mp4', file);
+  if (!require('fs').existsSync(p)) {
+    setAssetCors(res);
+    return res.status(404).end();
+  }
+  const stat = require('fs').statSync(p);
+  setAssetCors(res);
+  res.setHeader('Content-Type', 'video/mp4');
+  res.setHeader('Content-Length', String(stat.size));
+  res.setHeader('Accept-Ranges', 'bytes');
+  res.setHeader('Cache-Control', 'public, max-age=3600, immutable');
+  return res.status(200).end();
+});
+
+app.head('/assets/captions/:filename', (req, res) => {
+  const file = req.params.filename || '';
+  if (!/^[a-z0-9-_]+\.vtt$/i.test(file)) {
+    setAssetCors(res);
+    return res.status(400).end();
+  }
+  const p = path.join(ASSETS_ROOT, 'captions', file);
+  if (!require('fs').existsSync(p)) {
+    setAssetCors(res);
+    return res.status(404).end();
+  }
+  const stat = require('fs').statSync(p);
+  setAssetCors(res);
+  res.setHeader('Content-Type', 'text/vtt; charset=utf-8');
+  res.setHeader('Content-Length', String(stat.size));
+  res.setHeader('Cache-Control', 'public, max-age=3600, immutable');
+  return res.status(200).end();
+});
+
+// GET routes for correct MIME
+app.get('/assets/video/mp4/:filename', (req, res) => {
+  const file = req.params.filename || '';
+  const fs = require('fs');
+  if (!/^[a-z0-9-_]+\.mp4$/i.test(file)) {
+    setAssetCors(res);
+    return res.status(400).json({ error: 'Invalid filename' });
+  }
+  const p = path.join(ASSETS_ROOT, 'video/mp4', file);
+  if (!fs.existsSync(p)) {
+    setAssetCors(res);
+    return res.status(404).json({ error: 'Not found' });
+  }
+  const stat = fs.statSync(p);
+  setAssetCors(res);
+  res.setHeader('Content-Type', 'video/mp4');
+  res.setHeader('Content-Length', String(stat.size));
+  res.setHeader('Accept-Ranges', 'bytes');
+  res.setHeader('Cache-Control', 'public, max-age=3600, immutable');
+  return res.sendFile(p);
+});
+
+app.get('/assets/captions/:filename', (req, res) => {
+  const file = req.params.filename || '';
+  const fs = require('fs');
+  if (!/^[a-z0-9-_]+\.vtt$/i.test(file)) {
+    setAssetCors(res);
+    return res.status(400).json({ error: 'Invalid filename' });
+  }
+  const p = path.join(ASSETS_ROOT, 'captions', file);
+  if (!fs.existsSync(p)) {
+    setAssetCors(res);
+    return res.status(404).json({ error: 'Not found' });
+  }
+  const stat = fs.statSync(p);
+  setAssetCors(res);
+  res.setHeader('Content-Type', 'text/vtt; charset=utf-8');
+  res.setHeader('Content-Length', String(stat.size));
+  res.setHeader('Cache-Control', 'public, max-age=3600, immutable');
+  return res.sendFile(p);
+});
+
+// Fallback static for other files
+app.use('/assets', express.static(ASSETS_ROOT));
 
 // Mount routes
 app.use('/', routes);
